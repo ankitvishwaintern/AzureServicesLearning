@@ -1,10 +1,5 @@
-using Azure.Monitor.OpenTelemetry.Exporter;
 using Microsoft.ApplicationInsights;
 using OpenTelemetry;
-using OpenTelemetry.Instrumentation.AspNetCore;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,41 +10,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Application Insights
+// Add Application Insights - this automatically configures OpenTelemetry with Azure Monitor
 builder.Services.AddApplicationInsightsTelemetry();
 
-// Configure OpenTelemetry with Azure Monitor
-var connectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
-
-builder.Services
-    .AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddAzureMonitorTraceExporter(options =>
-            {
-                options.ConnectionString = connectionString;
-            });
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics
-            .AddAspNetCoreInstrumentation()
-            .AddRuntimeInstrumentation()
-            .AddAzureMonitorMetricExporter(options =>
-            {
-                options.ConnectionString = connectionString;
-            });
-    });
-
-builder.Logging.AddOpenTelemetry(logging =>
-{
-    logging.AddAzureMonitorLogExporter(options =>
-    {
-        options.ConnectionString = connectionString;
-    });
-});
+// OpenTelemetry is automatically configured with Azure Monitor when using AddApplicationInsightsTelemetry()
+// This includes tracing, metrics, and logging exporters for Azure Monitor
 
 var app = builder.Build();
 
