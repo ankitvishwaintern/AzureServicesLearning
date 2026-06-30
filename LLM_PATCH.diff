@@ -1,0 +1,73 @@
+### **Analysis**
+
+The Azure Application Insights trace shows a **System.DivideByZeroException** occurring in the method **Controllers.SampleDataController.Get**, specifically at line 37 in `SampleDataController.cs`. This is a classic .NET runtime exception when attempting to divide by zero.
+
+#### **Root Cause**
+- Your code in `SampleDataController.Get` is performing a division where the denominator is zero.
+- The lack of exception handling is causing the error to bubble up and be logged as a production incident.
+
+### **Concrete Fixes**
+
+#### **1. Prevent Division by Zero**
+- Check if the denominator is zero before the division
+- If possible, return a default value or handle the case gracefully (e.g., error message or alternative logic)
+
+#### **2. Add Exception Handling**
+- Wrap the logic in a try-catch block and handle the `DivideByZeroException` gracefully.
+
+### **Unified Diff (git patch style)**
+
+Suppose the relevant original code is similar to:
+```csharp
+// SampleDataController.cs
+
+public IActionResult Get()
+{
+    int numerator = ...;   // comes from data or request
+    int denominator = ...; // comes from data or request
+
+    int result = numerator / denominator;       // <-- line 37
+    // return result as response
+}
+```
+
+#### **Proposed Fix**
+
+```diff
+--- a/Controllers/SampleDataController.cs
++++ b/Controllers/SampleDataController.cs
+@@ public IActionResult Get()
+-    int numerator = ...;   // comes from data or request
+-    int denominator = ...; // comes from data or request
+-
+-    int result = numerator / denominator;       // <-- line 37
+-    // return result as response
++    int numerator = ...;   // comes from data or request
++    int denominator = ...; // comes from data or request
++
++    try
++    {
++        if (denominator == 0)
++        {
++            // Log error, return an error response
++            return BadRequest("Denominator cannot be zero.");
++        }
++
++        int result = numerator / denominator;
++        return Ok(result);
++    }
++    catch (DivideByZeroException ex)
++    {
++        // Log the exception with relevant context, return a meaningful error
++        // (Consider using your logging framework)
++        // _logger.LogError(ex, "Divide by zero in SampleDataController.Get");
++        return StatusCode(500, "Internal server error: Division by zero.");
++    }
+```
+
+### **Summary**
+
+- **Cause:** The method performs division without verifying the denominator is non-zero.
+- **Fix:** Check for denominator == 0 prior to division, return a proper error response, and optionally catch exceptions for robust error handling.
+
+**Result:** After applying these fixes, divide-by-zero will not cause unhandled exceptions, production incidents will be prevented, and you’ll have clearer error reporting for invalid inputs.
