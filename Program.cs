@@ -1,4 +1,5 @@
 using Microsoft.ApplicationInsights;
+using Middleware;
 using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,10 +14,17 @@ builder.Services.AddSwaggerGen();
 // Add Application Insights - this automatically configures OpenTelemetry with Azure Monitor
 builder.Services.AddApplicationInsightsTelemetry();
 
+// Register global exception handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 // OpenTelemetry is automatically configured with Azure Monitor when using AddApplicationInsightsTelemetry()
 // This includes tracing, metrics, and logging exporters for Azure Monitor
 
 var app = builder.Build();
+
+// Use the global exception handler (must be early in the pipeline)
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -32,6 +32,9 @@ namespace Controllers
             {
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
+                    int a = 9;
+                    int b = 0;
+                    int c = a / b;
                     _logger.LogInformation("SampleData endpoint called");
 
                     activity?.SetTag("data.count", 3);
@@ -79,6 +82,32 @@ namespace Controllers
                     _telemetryClient.TrackException(exceptionTelemetry);
                 }
                 return Array.Empty<DataItem>();
+            }
+        }
+
+        /// <summary>
+        /// Test endpoint for verifying global exception handler behavior.
+        /// GET /api/sampledata/test-exception
+        /// </summary>
+        [HttpGet("test-exception")]
+        public IActionResult TestException()
+        {
+            _logger.LogInformation("Test exception endpoint called");
+            
+            using (var activity = ActivitySource.StartActivity("TestException"))
+            {
+                activity?.SetTag("test.purpose", "global-exception-handler");
+                activity?.SetTag("endpoint", "TestException");
+
+                var properties = new Dictionary<string, string>
+                {
+                    { "endpoint", "TestException" },
+                    { "purpose", "global-exception-handler-test" }
+                };
+                _telemetryClient.TrackEvent("TestException_Called", properties);
+
+                // Intentionally throw an exception to test the global exception handler
+                throw new InvalidOperationException("This is a test exception to verify global exception handler is working correctly.");
             }
         }
     }
