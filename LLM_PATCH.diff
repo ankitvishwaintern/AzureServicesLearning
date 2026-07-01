@@ -1,0 +1,80 @@
+**Analysis of the Application Insights Trace**
+
+- **Exception:** `System.DivideByZeroException`
+- **Location:** `Controllers.SampleDataController.Get` at line 37 (`SampleDataController.cs`)
+- **Message:** "Attempted to divide by zero."
+- **Stack Trace:**  
+  `at Controllers.SampleDataController.Get() in D:\a\AzureServicesLearning\AzureServicesLearning\Controllers\SampleDataController.cs:line 37`
+
+**Root Cause**
+
+A division operation in `Get()` of `SampleDataController` is being performed with a divisor value of zero, causing an unhandled runtime exception (DivideByZeroException). This brings down the request and interrupts normal operation.
+
+**Concrete Code Fix:**
+
+1. **Check divisor for zero before division.**
+2. **Optionally, handle the exception with a try-catch and return an informative error.**
+
+Here is a typical code that might cause this (for illustrative purposes):
+```csharp
+int divisor = getDivisor(); // could be zero!
+int result = 100 / divisor; // <-- line 37, crashes if divisor==0
+```
+
+**Unified Diff Patch Example**
+
+Below is a typical patch you should apply to `SampleDataController.cs`, around line 37.  
+Replace division with a safety check, and optionally handle the error gracefully.
+
+```diff
+--- a/Controllers/SampleDataController.cs
++++ b/Controllers/SampleDataController.cs
+@@ -35,7 +35,16 @@
+     public IActionResult Get()
+     {
+-        int divisor = getDivisor(); // or however divisor is obtained
+-        int result = 100 / divisor; // line 37 -- fails if divisor==0
+-        // ... other code
++        int divisor = getDivisor(); // or however divisor is obtained
++        if (divisor == 0)
++        {
++            // Log warning or return error response
++            return BadRequest("Divisor cannot be zero. Please provide a valid value.");
++        }
++        int result = 100 / divisor; // safe division now
++        // ... other code
++        return Ok(result);
+     }
+ }
+```
+
+**Alternative: Defensive Try-Catch (if multiple sources of zero possible):**
+```diff
+@@ -35,7 +35,17 @@
+     public IActionResult Get()
+     {
+-        int divisor = getDivisor();
+-        int result = 100 / divisor; // line 37
++        int divisor = getDivisor();
++        try
++        {
++            int result = 100 / divisor;
++            return Ok(result);
++        }
++        catch (DivideByZeroException ex)
++        {
++            // Log the exception, return an error response
++            return BadRequest("Division by zero error: please check input.");
++        }
+     }
+ }
+```
+
+**Summary**
+
+- The error is due to division by zero at line 37 in `SampleDataController.cs`.
+- Fix: Check for zero, handle gracefully, return error instead of crashing.
+- Patch supplied is typical for this kind of issue.  
+- **Be sure to review upstream input validation to ensure zero values aren’t propagated unintentionally.**
+
+If you paste the exact code around line 37, I can tailor the patch to your codebase.
