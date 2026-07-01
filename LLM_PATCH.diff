@@ -1,0 +1,98 @@
+**Analysis:**
+
+The Application Insights trace shows:
+
+- **Exception:** System.DivideByZeroException
+- **Method:** Controllers.SampleDataController.Get
+- **File:** SampleDataController.cs
+- **Line:** 37
+- **Message:** Attempted to divide by zero.
+- **StackTrace:** at Controllers.SampleDataController.Get() in SampleDataController.cs:line 37
+
+**Root Cause:**
+
+Your Get() method in SampleDataController at line 37 attempts a division operation where the denominator is zero, hence the `DivideByZeroException`.
+
+---
+
+**Concrete Fix Proposal:**
+
+- **Add proper input/data validation before division to ensure denominator is not zero.**
+- **Handle exception gracefully and provide a meaningful error message.**
+- **Optional:** If denominator comes from user input/query parameter/etc., return a bad request or other suitable error.
+
+---
+
+Assuming the affected code looks like this around line 37 (typical pattern):
+
+```csharp
+public IActionResult Get()
+{
+    int numerator = ...;
+    int denominator = ...; // Possibly user input or computed
+    int result = numerator / denominator; // line 37
+
+    // ... rest of code
+}
+```
+
+**Patch:**
+
+```diff
+--- a/Controllers/SampleDataController.cs
++++ b/Controllers/SampleDataController.cs
+@@ -35,7 +35,18 @@
+     public IActionResult Get()
+     {
+-        int numerator = ...;
+-        int denominator = ...; // Possibly user input or computed
+-        int result = numerator / denominator; // line 37
+-
+-        // ... rest of code
++        int numerator = ...;
++        int denominator = ...; // Possibly user input or computed
++
++        if (denominator == 0)
++        {
++            // Log an error or return a meaningful response
++            return BadRequest("Denominator cannot be zero.");
++        }
++
++        int result = numerator / denominator;
++
++        // ... rest of code
+     }
+```
+
+**If the denominator is computed or parsed from query parameters:**
+
+Add validation *where* the denominator is set:
+
+```diff
+@@ -30,8 +30,13 @@
+     public IActionResult Get()
+     {
+-        // Example: getting denominator from query string
+-        int denominator = int.Parse(Request.Query["denominator"]);
++        // Example: getting denominator from query string
++        int denominator;
++        if (!int.TryParse(Request.Query["denominator"], out denominator))
++        {
++            return BadRequest("Invalid denominator value.");
++        }
++        if (denominator == 0)
++        {
++            return BadRequest("Denominator cannot be zero.");
++        }
+     }
+```
+
+---
+
+**Summary**
+
+- Check denominator before division.
+- Return HTTP 400 BadRequest if invalid (zero or not parseable).
+- This will prevent DivideByZeroException and improve robustness.
+
+Let me know if you want more context or see the full method!
