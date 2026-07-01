@@ -32,13 +32,33 @@ namespace Controllers
             {
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
-                    int a = 9;
-                    int b = 0;
-                    int c = a / b;
-                    _logger.LogInformation("SampleData endpoint called");
+            int numerator = GetNumeratorSomehow();
 
-                    activity?.SetTag("data.count", 3);
-                    activity?.SetTag("data.source", "in-memory");
+            int denominator = GetDenominatorSomehow(); // can be zero!
+
+            
+
+            if (denominator == 0)
+
+            {
+
+                // Option 1: Return error response
+
+                return BadRequest("Denominator cannot be zero.");
+
+                // Option 2: Or, handle according to business logic, e.g. set default value
+
+                // int result = 0; // Or whatever makes sense
+
+                // return Ok(result);
+
+            }
+
+
+
+            int result = numerator / denominator;
+
+            return Ok(result);
 
                     // Track custom event in Azure Application Insights
                     var properties = new Dictionary<string, string>
