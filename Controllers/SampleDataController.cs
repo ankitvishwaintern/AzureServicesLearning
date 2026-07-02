@@ -33,9 +33,12 @@ namespace Controllers
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
                     int a = 9;
-                    int b = 0;
-                    int c = a / b;
-                    _logger.LogInformation("SampleData endpoint called");
+// Example: int divisor = ...;
+if (divisor == 0)
+{
+    throw new InvalidOperationException("Divisor cannot be zero.");
+}
+int result = numerator / divisor;
 
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
