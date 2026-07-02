@@ -33,9 +33,12 @@ namespace Controllers
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
                     int a = 9;
-                    int b = 0;
-                    int c = a / b;
-                    _logger.LogInformation("SampleData endpoint called");
+// Assuming the problematic code is similar to: int result = a / b;
+if (b == 0)
+{
+    return BadRequest("Denominator cannot be zero.");
+}
+int result = a / b;
 
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
