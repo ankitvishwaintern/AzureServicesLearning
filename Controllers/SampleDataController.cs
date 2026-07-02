@@ -33,10 +33,13 @@ namespace Controllers
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
                     int a = 9;
-                    int b = 0;
-                    int c = a / b;
-                    _logger.LogInformation("SampleData endpoint called");
-
+// Example fix: Prevent division by zero
+int denominator = /* existing code to get denominator */;
+if (denominator == 0)
+{
+    throw new InvalidOperationException("Denominator cannot be zero.");
+}
+int result = numerator / denominator; // existing division logic
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
 
