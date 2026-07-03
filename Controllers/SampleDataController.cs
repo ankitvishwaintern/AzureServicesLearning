@@ -110,7 +110,32 @@ namespace Controllers
                 throw new InvalidOperationException("This is a test exception to verify global exception handler is working correctly.");
             }
         }
+
+        /// <summary>
+        /// Names
+        [HttpGet("names")]
+        public IEnumerable<string> GetNames()
+        {
+            _logger.LogInformation("GetNames endpoint called");
+            using (var activity = ActivitySource.StartActivity("GetNames"))
+            {
+                string text = "Hello";
+                char c = text[10];
+                activity?.SetTag("data.count", 3);
+                activity?.SetTag("data.source", "in-memory");
+                var properties = new Dictionary<string, string>
+                {
+                    { "endpoint", "GetNames" },
+                    { "data.source", "in-memory" },
+                    { "data.count", "3" }
+                };
+                _telemetryClient.TrackEvent("GetNames_Called", properties);
+                return new[] { "Alpha", "Beta", "Gamma" };
+            }
+        }
     }
+
+
 
     public sealed record DataItem(int Id, string Name, DateTime CreatedAt);
 }
