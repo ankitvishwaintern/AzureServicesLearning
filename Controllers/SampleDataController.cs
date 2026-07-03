@@ -120,7 +120,12 @@ namespace Controllers
             using (var activity = ActivitySource.StartActivity("GetNames"))
             {
                 string text = "Hello";
-                char c = text[10];
+// Ensure index is within bounds before accessing array or string
+if (index < 0 || index >= namesArray.Length)
+{
+    return BadRequest("Index is out of range.");
+}
+var name = namesArray[index];
                 activity?.SetTag("data.count", 3);
                 activity?.SetTag("data.source", "in-memory");
                 var properties = new Dictionary<string, string>
