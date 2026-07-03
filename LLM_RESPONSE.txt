@@ -1,0 +1,18 @@
+```json
+{
+  "summary": "A System.DivideByZeroException occurred in Controllers/SampleDataController.cs at line 37, within the Get method. This indicates that a division operation attempted to divide by zero, which is not allowed and causes the application to throw an exception.",
+  "changes": [
+    {
+      "file": "Controllers/SampleDataController.cs",
+      "reason": "Prevent division by zero to avoid System.DivideByZeroException.",
+      "start_line": 37,
+      "end_line": 37,
+      "replacement_code": "// Prevent division by zero\nif (denominator == 0)\n{\n    throw new InvalidOperationException(\"Denominator cannot be zero.\");\n}\nvar result = numerator / denominator;"
+    }
+  ]
+}
+```
+**Notes:**
+- The actual variable names (`numerator`, `denominator`) should be replaced with the real ones in your code if they differ.
+- This fix checks for zero before performing the division, throwing a more descriptive exception if zero is detected, thus preventing the unhandled DivideByZeroException.
+- Only the minimal code around the division is changed, preserving all other logic, formatting, and comments.
