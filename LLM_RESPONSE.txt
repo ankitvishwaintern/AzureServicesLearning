@@ -1,0 +1,14 @@
+```json
+{
+  "summary": "A System.DivideByZeroException occurred in Controllers.SampleDataController.Get at line 37. This indicates that a division operation attempted to divide by zero, which is not allowed and causes the application to crash.",
+  "changes": [
+    {
+      "file": "Controllers/SampleDataController.cs",
+      "reason": "Prevent division by zero to avoid runtime exception.",
+      "start_line": 37,
+      "end_line": 37,
+      "replacement_code": "// Ensure denominator is not zero to prevent DivideByZeroException\nif (denominator == 0)\n{\n    // Handle zero denominator appropriately, e.g., return default value or error\n    return BadRequest(\"Denominator cannot be zero.\");\n}\nvar result = numerator / denominator;"
+    }
+  ]
+}
+```
