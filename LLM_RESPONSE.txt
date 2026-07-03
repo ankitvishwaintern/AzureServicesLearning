@@ -1,0 +1,15 @@
+```json
+{
+  "summary": "A System.DivideByZeroException occurred in the Get method of Controllers.SampleDataController.cs at line 37. This indicates that a division operation is being performed where the denominator is zero, which is not allowed in C#. The root cause is likely a variable or value used as a divisor that can be zero and is not being checked before the division.",
+  "changes": [
+    {
+      "file": "Controllers/SampleDataController.cs",
+      "reason": "Add a check to prevent division by zero, ensuring the denominator is not zero before performing the division. This prevents the System.DivideByZeroException.",
+      "start_line": 36,
+      "end_line": 39,
+      "replacement_code": "            int numerator = /* existing numerator value */;\n            int denominator = /* existing denominator value */;\n            if (denominator == 0)\n            {\n                // Handle zero denominator case appropriately\n                return BadRequest(\"Denominator cannot be zero.\");\n            }\n            int result = numerator / denominator;"
+    }
+  ]
+}
+```
+(Note: Replace `/* existing numerator value */` and `/* existing denominator value */` with the actual variables or values used in your code. The line numbers are estimated based on the trace and may need adjustment to match your actual code.)
