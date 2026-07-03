@@ -1,0 +1,20 @@
+```json
+{
+  "summary": "A System.DivideByZeroException occurred in Controllers/SampleDataController.cs at line 37, within the Get method. This indicates that a division operation was attempted with a denominator of zero, which is not allowed in C#. The root cause is likely a variable or value being zero at the point of division, and no check was performed to prevent this.",
+  "changes": [
+    {
+      "file": "Controllers/SampleDataController.cs",
+      "reason": "Add a check to prevent division by zero, ensuring the denominator is not zero before performing the division. This prevents the System.DivideByZeroException.",
+      "start_line": 36,
+      "end_line": 38,
+      "replacement_code": "// Existing code above\nif (denominator == 0)\n{\n    // Handle zero denominator case appropriately\n    return BadRequest(\"Denominator cannot be zero.\");\n}\nvar result = numerator / denominator;\n// Existing code below"
+    }
+  ]
+}
+```
+**Notes:**
+- The actual variable names (`numerator`, `denominator`) should be replaced with the real ones from your code at line 37.
+- The patch is minimal, only adding a check before the division.
+- The error message is returned as a `BadRequest` (assuming this is an API controller).
+- No unrelated code, type hints, or imports are removed or changed.
+- Indentation and comments are preserved as per your rules.
