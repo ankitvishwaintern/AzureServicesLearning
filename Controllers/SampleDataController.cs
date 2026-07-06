@@ -28,10 +28,7 @@ namespace Controllers
         [HttpGet("SampleData")]
         public IEnumerable<DataItem> Get()
         {
-            try
-            {
-                using (var activity = ActivitySource.StartActivity("GetSampleData"))
-                {
+                    _logger.LogInformation("SampleData endpoint called");
                     int a = 9;
                     int b = 0;
                     int c = a / b;
