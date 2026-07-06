@@ -33,10 +33,14 @@ namespace Controllers
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
                     int a = 9;
-                    int b = 0;
-                    int c = a / b;
-                    _logger.LogInformation("SampleData endpoint called");
-
+int numerator = ...; // assign or receive from parameters
+int denominator = ...; // assign or receive from parameters
+if (denominator == 0)
+{
+    return BadRequest("Denominator cannot be zero.");
+}
+int result = numerator / denominator;
+return Ok(result);
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
 
