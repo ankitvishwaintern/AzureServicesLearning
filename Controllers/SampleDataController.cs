@@ -34,7 +34,7 @@ namespace Controllers
                 {
                     int a = 9;
                     int b = 0;
-                    int c = a / b;
+            int result = (divisor != 0) ? (numerator / divisor) : 0; // Ensure 'numerator' and 'divisor' are defined in this method's scope before use
                     _logger.LogInformation("SampleData endpoint called");
 
                     activity?.SetTag("data.count", 3);
