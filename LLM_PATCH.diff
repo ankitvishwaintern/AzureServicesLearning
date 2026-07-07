@@ -1,0 +1,90 @@
+### Analysis
+
+**Exception Details:**
+- **Exception:** `System.DivideByZeroException`
+- **Location:** `Controllers.SampleDataController.Get`, line 37 (`SampleDataController.cs`)
+- **Stack Trace:**  
+  ```
+  at Controllers.SampleDataController.Get() in D:\\a\\AzureServicesLearning\\AzureServicesLearning\\Controllers\\SampleDataController.cs:line 37
+  ```
+- **Message:** "Attempted to divide by zero."
+- **ProblemId:** `"System.DivideByZeroException at Controllers.SampleDataController.Get:22"`
+
+#### Root Cause
+
+The error occurs because there is an attempted division by zero in the `Get` method of `SampleDataController` at or around line 37 in `SampleDataController.cs`. This is almost always due to code like:
+
+```csharp
+int result = a / b; // b is 0
+```
+or similar, where the denominator is not checked.
+
+---
+
+### Concrete Code Fix Proposal
+
+#### Fix 1: Add denominator check to prevent divide by zero
+
+**Assuming code like:**
+```csharp
+int result = value1 / value2;
+```
+Add a guard to ensure `value2` is not zero.
+
+**Unified diff patch example:**
+
+```diff
+--- a/Controllers/SampleDataController.cs
++++ b/Controllers/SampleDataController.cs
+@@ -34,7 +34,13 @@
+     public IActionResult Get()
+     {
+-        int result = value1 / value2; // line 37
++        if (value2 == 0)
++        {
++            // Log error or return appropriate response
++            return BadRequest("Division by zero is not allowed.");
++        }
++        int result = value1 / value2;
++        
+         // ... existing code ...
+         return Ok(result);
+     }
+```
+
+---
+
+#### Fix 2: Optionally handle exception gracefully
+
+If values may be dynamic and you want extra robustness:
+
+```diff
+--- a/Controllers/SampleDataController.cs
++++ b/Controllers/SampleDataController.cs
+@@ -34,7 +34,15 @@
+     public IActionResult Get()
+     {
+-        int result = value1 / value2; // line 37
++        try
++        {
++            int result = value1 / value2;
++            return Ok(result);
++        }
++        catch (DivideByZeroException)
++        {
++            // Optionally log error
++            return BadRequest("Division by zero is not allowed.");
++        }
+     }
+```
+
+---
+
+### Summary
+
+**Root Cause:** Division by zero in `SampleDataController.Get` at line 37.  
+**Fix:** Check denominator before dividing and return `BadRequest` if denominator is zero, OR catch `DivideByZeroException` and handle gracefully.
+
+**Unified diff patch provided above.**
+
+If you can share the relevant code snippet from `SampleDataController.Get`, I can refine the patch for your actual code.
