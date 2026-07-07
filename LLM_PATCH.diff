@@ -1,0 +1,58 @@
+**Root Cause Analysis**
+
+- The exception is `System.DivideByZeroException` in `Controllers.SampleDataController.Get` method.
+- The stack trace: `"at Controllers.SampleDataController.Get() in D:\a\AzureServicesLearning\AzureServicesLearning\Controllers\SampleDataController.cs:line 37"`
+- The outer and innermost exception messages both confirm: `"Attempted to divide by zero."`
+- So, somewhere in line 37 of `SampleDataController.cs`, a division by zero occurs.
+
+**Concrete Fixes**
+
+You need to review any division operation in `Get()` method, especially near line 37. 
+Common code mistake: division using an integer divisor that can be zero, e.g. `var result = a / b;` where `b` can be 0.
+
+**Proposed Fixes**
+
+Below is a **patch** that adds validation to ensure divisor is not zero and handles the exception gracefully.
+
+> **NOTE**: Exact variable names and logic may differ; adjust as needed for your actual implementation.
+
+```diff
+--- a/AzureServicesLearning/Controllers/SampleDataController.cs
++++ b/AzureServicesLearning/Controllers/SampleDataController.cs
+@@ -35,10 +35,22 @@
+         [HttpGet]
+         public IActionResult Get()
+         {
+-            int a = GetSomeValue();
+-            int b = GetDivisor(); // This could be 0
+-            int result = a / b; // <-- line 37: possible divide by zero
+-            return Ok(result);
++            int a = GetSomeValue();
++            int b = GetDivisor(); // This could be 0
++            if (b == 0)
++            {
++                // Log error and return a meaningful API response
++                _logger.LogError("Division by zero attempted in SampleDataController.Get. Divisor value: {Divisor}", b);
++                return BadRequest("Divisor cannot be zero."); // Or return a default value, as per requirements
++            }
++            int result = a / b;
++            return Ok(result);
+         }
+```
+
+**Explanation:**
+
+- **Check if `b` is zero:** Before division, add `if (b == 0)` to prevent dividing by zero.
+- **Log the error:** Use `_logger` for diagnostic purposes.
+- **Return a safe response:** Instead of crashing, return `BadRequest("Divisor cannot be zero.")` or handle as your API requires.
+
+**Additional Recommendations:**
+
+- Refactor any repeated division logic throughout this controller to check for zero divisors.
+- Add unit tests for edge cases when the divisor is zero.
+
+**Summary:**  
+Root cause: Division by zero at line 37 in `SampleDataController.Get()`.  
+Fix: Add a guard to check divisor is not zero before dividing. Return an appropriate API response if zero is detected.
+
+Let me know if you want a fix for a specific code segment or additional context!
