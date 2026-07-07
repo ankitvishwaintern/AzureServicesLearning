@@ -120,7 +120,7 @@ namespace Controllers
             using (var activity = ActivitySource.StartActivity("GetNames"))
             {
                 string text = "Hello";
-                char c = text[10];
+                char c = (text.Length > 10) ? text[10] : '\0';
                 activity?.SetTag("data.count", 3);
                 activity?.SetTag("data.source", "in-memory");
                 var properties = new Dictionary<string, string>
