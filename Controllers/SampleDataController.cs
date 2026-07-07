@@ -23,9 +23,7 @@ namespace Controllers
 
         /// <summary>
         /// Returns a small set of sample data.
-        /// GET /api/sampledata
-        /// </summary>
-        [HttpGet("SampleData")]
+                    _logger.LogInformation("SampleData endpoint called");
         public IEnumerable<DataItem> Get()
         {
             try
