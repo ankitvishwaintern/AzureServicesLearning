@@ -33,8 +33,8 @@ namespace Controllers
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
                     int a = 9;
-                    int b = 0;
-                    int c = a / b;
+                    int b = 1;
+                    int c = b != 0 ? a / b : 0;
                     _logger.LogInformation("SampleData endpoint called");
 
                     activity?.SetTag("data.count", 3);
