@@ -57,7 +57,7 @@ namespace Controllers
                     };
 
                     _logger.LogInformation("Successfully returned {count} data items", data.Length);
-                    
+
                     return data;
                 }
             }
@@ -93,7 +93,7 @@ namespace Controllers
         public IActionResult TestException()
         {
             _logger.LogInformation("Test exception endpoint called");
-            
+
             using (var activity = ActivitySource.StartActivity("TestException"))
             {
                 activity?.SetTag("test.purpose", "global-exception-handler");
@@ -195,5 +195,6 @@ namespace Controllers
 
 
 
-    public sealed record DataItem(int Id, string Name, DateTime CreatedAt);
+        public sealed record DataItem(int Id, string Name, DateTime CreatedAt);
+    }
 }
