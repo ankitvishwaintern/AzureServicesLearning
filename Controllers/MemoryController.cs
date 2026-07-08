@@ -18,6 +18,11 @@ namespace AzureServicesLearning.Controllers
         // Every time this endpoint is hit, memory consumption climbs permanently.
         private static readonly List<byte[]> _globalReportCache = new List<byte[]>();
 
+        public MemoryController(ILogger<SampleDataController> logger, TelemetryClient telemetryClient)
+        {
+            _logger = logger;
+            _telemetryClient = telemetryClient;
+        }
         [HttpGet("generate")]
         public IActionResult GenerateBigReport()
         {
