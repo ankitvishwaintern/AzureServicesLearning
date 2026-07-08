@@ -143,7 +143,19 @@ namespace Controllers
                 {
 
                     _logger.LogInformation("Mathop endpoint called");
-                    int c = Convert.ToInt32(value1) / Convert.ToInt32(value2);
+                    if (!int.TryParse(value1, out int val1) || !int.TryParse(value2, out int val2))
+                    {
+                        _logger.LogWarning("Invalid input values provided to Mathop endpoint: value1={value1}, value2={value2}", value1, value2);
+                        return "Invalid input: both value1 and value2 must be valid integers.";
+                    }
+
+                    if (val2 == 0)
+                    {
+                        _logger.LogWarning("Attempted division by zero in Mathop endpoint. value1={value1}, value2={value2}", value1, value2);
+                        return "Invalid input: division by zero is not allowed.";
+                    }
+
+                    int c = val1 / val2;
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
 
