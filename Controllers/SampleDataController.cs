@@ -32,9 +32,7 @@ namespace Controllers
             {
                 using (var activity = ActivitySource.StartActivity("GetSampleData"))
                 {
-                    int a = 9;
-                    int b = 0;
-                    int c = a / b;
+                    // Removed unused variables that caused unintended division by zero
                     _logger.LogInformation("SampleData endpoint called");
 
                     activity?.SetTag("data.count", 3);
