@@ -1,0 +1,27 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AzureServicesLearning.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MemoryController : ControllerBase
+    {
+        // Issue 1: Static references never get cleared by Garbage Collection.
+        // Every time this endpoint is hit, memory consumption climbs permanently.
+        private static readonly List<byte[]> _globalReportCache = new List<byte[]>();
+
+        [HttpGet("generate")]
+        public IActionResult GenerateBigReport()
+        {
+            // Force an instant crash on the very first hit.
+            // int.MaxValue attempts to create an array with 2,147,483,647 integers.
+            // At 4 bytes per integer, this demands ~8.5 Gigabytes of perfectly 
+            // contiguous, unbroken memory space all at once.
+            int[] massiveArray = new int[int.MaxValue];
+
+            return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+        }
+    }
+        
+}
