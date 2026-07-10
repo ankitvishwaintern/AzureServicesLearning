@@ -143,7 +143,15 @@ namespace Controllers
                 {
 
                     _logger.LogInformation("Mathop endpoint called");
-                    int c = Convert.ToInt32(value1) / Convert.ToInt32(value2);
+                    if (!int.TryParse(value1, out int intValue1) || !int.TryParse(value2, out int intValue2))
+                    {
+                        throw new ArgumentException("Both value1 and value2 must be valid integers.");
+                    }
+                    if (intValue2 == 0)
+                    {
+                        throw new DivideByZeroException("value2 cannot be zero.");
+                    }
+                    int c = intValue1 / intValue2;
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
 
