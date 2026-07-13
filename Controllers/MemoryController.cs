@@ -25,16 +25,29 @@ namespace AzureServicesLearning.Controllers
         }
         [HttpGet("generate")]
         public IActionResult GenerateBigReport()
-        {            
-                // Force an instant crash on the very first hit.
-                // int.MaxValue attempts to create an array with 2,147,483,647 integers.
-                // At 4 bytes per integer, this demands ~8.5 Gigabytes of perfectly 
-                // contiguous, unbroken memory space all at once.   
+        {
+            // Fixed: Removed the intentional massive allocation (int.MaxValue) that
+            // caused an immediate OutOfMemoryException. Use a safe, bounded size instead.
+            const int SafeArraySize = 1000; // Small, bounded allocation for demonstration purposes
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                int[] safeArray = new int[SafeArraySize];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                // Defensive: cap the static cache size to prevent unbounded memory growth (Issue 1 fix).
+                const int MaxCacheEntries = 50;
+                var reportBytes = new byte[SafeArraySize * sizeof(int)];
+                Buffer.BlockCopy(safeArray, 0, reportBytes, 0, reportBytes.Length);
+
+                lock (_globalReportCache)
+                {
+                    if (_globalReportCache.Count >= MaxCacheEntries)
+                    {
+                        _globalReportCache.RemoveAt(0);
+                    }
+                    _globalReportCache.Add(reportBytes);
+                }
+
+                return Ok(new { Message = "Report generated safely.", Length = safeArray.Length });
             }
             catch (Exception ex)
             {
