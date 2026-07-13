@@ -143,7 +143,22 @@ namespace Controllers
                 {
 
                     _logger.LogInformation("Mathop endpoint called");
-                    int c = Convert.ToInt32(value1) / Convert.ToInt32(value2);
+
+                    if (!int.TryParse(value1, out int num1) || !int.TryParse(value2, out int num2))
+                    {
+                        _logger.LogWarning("Invalid input values provided: value1={value1}, value2={value2}", value1, value2);
+                        activity?.SetTag("error", "invalid-input");
+                        return "Error: value1 and value2 must be valid integers.";
+                    }
+
+                    if (num2 == 0)
+                    {
+                        _logger.LogWarning("Division by zero attempted: value1={value1}, value2={value2}", value1, value2);
+                        activity?.SetTag("error", "divide-by-zero");
+                        return "Error: Cannot divide by zero.";
+                    }
+
+                    int c = num1 / num2;
                     activity?.SetTag("data.count", 3);
                     activity?.SetTag("data.source", "in-memory");
 
@@ -164,10 +179,11 @@ namespace Controllers
 
                     };
 
-                    _logger.LogInformation("Successfully returned sum - ", c);
+                    _logger.LogInformation("Successfully returned sum - {result}", c);
 
                     return c.ToString();
                 }
+            }
             }
             catch (Exception ex)
             {
