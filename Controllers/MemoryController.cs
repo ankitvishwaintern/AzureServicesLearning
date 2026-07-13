@@ -14,9 +14,8 @@ namespace AzureServicesLearning.Controllers
         private readonly ILogger<SampleDataController> _logger;
         private readonly TelemetryClient _telemetryClient;
         private static readonly ActivitySource ActivitySource = new("MemoryController");
-        // Issue 1: Static references never get cleared by Garbage Collection.
-        // Every time this endpoint is hit, memory consumption climbs permanently.
-        private static readonly List<byte[]> _globalReportCache = new List<byte[]>();
+        // Issue 1 fixed: Removed static unbounded cache that permanently retained memory across requests.
+        // If caching is required, use a bounded, expiring cache (e.g., MemoryCache) instead of a static List<byte[]>.
 
         public MemoryController(ILogger<SampleDataController> logger, TelemetryClient telemetryClient)
         {
@@ -24,17 +23,23 @@ namespace AzureServicesLearning.Controllers
             _telemetryClient = telemetryClient;
         }
         [HttpGet("generate")]
+        [HttpGet("generate")]
         public IActionResult GenerateBigReport()
-        {            
-                // Force an instant crash on the very first hit.
-                // int.MaxValue attempts to create an array with 2,147,483,647 integers.
-                // At 4 bytes per integer, this demands ~8.5 Gigabytes of perfectly 
-                // contiguous, unbroken memory space all at once.   
+        {
+            // Fixed: Avoid allocating an unrealistically large array (int.MaxValue elements ~8.5GB)
+            // which always throws OutOfMemoryException and crashes the process.
+            // Use a safe, bounded size instead, and handle allocation failures gracefully.
+            const int SafeArraySize = 10_000_000; // ~40 MB, a reasonable bounded allocation
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                int[] safeArray = new int[SafeArraySize];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                return Ok(new { Message = "Report generated successfully.", Length = safeArray.Length });
+            }
+            catch (OutOfMemoryException ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return StatusCode(StatusCodes.Status507InsufficientStorage, new { Message = "Insufficient memory to generate report." });
             }
             catch (Exception ex)
             {
@@ -42,6 +47,5 @@ namespace AzureServicesLearning.Controllers
                 throw;
             }
         }
-    }
         
 }
