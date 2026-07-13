@@ -14,9 +14,8 @@ namespace AzureServicesLearning.Controllers
         private readonly ILogger<SampleDataController> _logger;
         private readonly TelemetryClient _telemetryClient;
         private static readonly ActivitySource ActivitySource = new("MemoryController");
-        // Issue 1: Static references never get cleared by Garbage Collection.
-        // Every time this endpoint is hit, memory consumption climbs permanently.
-        private static readonly List<byte[]> _globalReportCache = new List<byte[]>();
+        // Issue 1 fixed: Removed static unbounded cache that permanently retained memory across requests.
+        // If caching is required, use a bounded, expiring cache (e.g., MemoryCache) instead of a static List<byte[]>.
 
         public MemoryController(ILogger<SampleDataController> logger, TelemetryClient telemetryClient)
         {
