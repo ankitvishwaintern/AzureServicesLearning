@@ -23,17 +23,23 @@ namespace AzureServicesLearning.Controllers
             _telemetryClient = telemetryClient;
         }
         [HttpGet("generate")]
+        [HttpGet("generate")]
         public IActionResult GenerateBigReport()
-        {            
-                // Force an instant crash on the very first hit.
-                // int.MaxValue attempts to create an array with 2,147,483,647 integers.
-                // At 4 bytes per integer, this demands ~8.5 Gigabytes of perfectly 
-                // contiguous, unbroken memory space all at once.   
+        {
+            // Fixed: Avoid allocating an unrealistically large array (int.MaxValue elements ~8.5GB)
+            // which always throws OutOfMemoryException and crashes the process.
+            // Use a safe, bounded size instead, and handle allocation failures gracefully.
+            const int SafeArraySize = 10_000_000; // ~40 MB, a reasonable bounded allocation
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                int[] safeArray = new int[SafeArraySize];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                return Ok(new { Message = "Report generated successfully.", Length = safeArray.Length });
+            }
+            catch (OutOfMemoryException ex)
+            {
+                _telemetryClient.TrackException(ex);
+                return StatusCode(StatusCodes.Status507InsufficientStorage, new { Message = "Insufficient memory to generate report." });
             }
             catch (Exception ex)
             {
@@ -41,6 +47,5 @@ namespace AzureServicesLearning.Controllers
                 throw;
             }
         }
-    }
         
 }
