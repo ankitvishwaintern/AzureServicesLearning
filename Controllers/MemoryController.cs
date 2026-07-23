@@ -32,9 +32,20 @@ namespace AzureServicesLearning.Controllers
                 // contiguous, unbroken memory space all at once.   
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                // Fixed: avoid unbounded/impossible allocation that guarantees OutOfMemoryException.
+                // Use a reasonable, bounded size to simulate report generation.
+                const int reportSizeBytes = 1024 * 1024; // 1 MB simulated report
+                byte[] reportData = new byte[reportSizeBytes];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                // Prevent unbounded growth of the static cache which never gets cleared.
+                const int maxCachedReports = 10;
+                if (_globalReportCache.Count >= maxCachedReports)
+                {
+                    _globalReportCache.RemoveAt(0);
+                }
+                _globalReportCache.Add(reportData);
+
+                return Ok(new { Message = "Report generated successfully.", Length = reportData.Length });
             }
             catch (Exception ex)
             {
