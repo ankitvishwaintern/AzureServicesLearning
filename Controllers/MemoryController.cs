@@ -32,9 +32,12 @@ namespace AzureServicesLearning.Controllers
                 // contiguous, unbroken memory space all at once.   
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                // Fixed: Avoid allocating an unreasonably large array that guarantees OutOfMemoryException.
+                // Use a safe, bounded size instead of int.MaxValue.
+                const int SafeArraySize = 1_000_000; // ~4MB, safe and reasonable for demonstration purposes
+                int[] safeArray = new int[SafeArraySize];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                return Ok(new { Message = "Report generated successfully.", Length = safeArray.Length });
             }
             catch (Exception ex)
             {
