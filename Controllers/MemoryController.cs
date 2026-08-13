@@ -32,9 +32,20 @@ namespace AzureServicesLearning.Controllers
                 // contiguous, unbroken memory space all at once.   
             try
             {
-                int[] massiveArray = new int[int.MaxValue];
+                // Fixed: avoid requesting an impossible contiguous allocation (int.MaxValue ints ~8.5GB)
+                // Use a safe, bounded size instead to prevent immediate OutOfMemoryException.
+                const int SafeArraySize = 1_000_000; // ~4MB, safe bounded allocation
+                int[] safeArray = new int[SafeArraySize];
 
-                return Ok(new { Message = "This line will never be reached.", Length = massiveArray.Length });
+                // Avoid unbounded growth of the static cache: cap its size and evict oldest entries.
+                var reportChunk = new byte[SafeArraySize * sizeof(int)];
+                if (_globalReportCache.Count >= 10)
+                {
+                    _globalReportCache.RemoveAt(0);
+                }
+                _globalReportCache.Add(reportChunk);
+
+                return Ok(new { Message = "Report generated safely.", Length = safeArray.Length });
             }
             catch (Exception ex)
             {
